@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeteoRwanda - Real-Time Weather System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .weather-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .weather-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .current-weather {
+            grid-column: 1 / -1;
+            text-align: center;
+        }
+
+        .location {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .location i {
+            margin-right: 0.5rem;
+            color: #667eea;
+        }
+
+        .temperature {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #333;
+            margin: 1rem 0;
+        }
+
+        .weather-icon {
+            font-size: 3rem;
+            margin: 1rem 0;
+            color: #667eea;
+        }
+
+        .weather-description {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .detail-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+        }
+
+        .detail-icon {
+            font-size: 1.5rem;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .alerts-section {
+            grid-column: 1 / -1;
+        }
+
+        .alert {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            animation: pulse 2s infinite;
+        }
+
+        .alert.warning {
+            background: linear-gradient(135deg, #ffa726, #ff9800);
+        }
+
+        .alert.info {
+            background: linear-gradient(135deg, #42a5f5, #2196f3);
+        }
+
+        .alert i {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        .forecast-section {
+            grid-column: 1 / -1;
+        }
+
+        .forecast-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .forecast-item {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .forecast-day {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .forecast-temp {
+            font-size: 1.1rem;
+            color: #667eea;
+            margin: 0.5rem 0;
+        }
+
+        .sector-specific {
+            background: linear-gradient(135deg, #4caf50, #45a049);
+            color: white;
+        }
+
+        .sector-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .sector-title i {
+            margin-right: 0.5rem;
+        }
+
+        .sector-advice {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .mobile-section {
+            grid-column: 1 / -1;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .mobile-mockup {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .phone-frame {
+            width: 200px;
+            height: 350px;
+            background: #333;
+            border-radius: 25px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        .app-header {
+            background: #667eea;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 0.8rem;
+        }
+
+        .app-content {
+            font-size: 0.7rem;
+            color: #333;
+        }
+
+        .download-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .download-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+            
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .temperature {
+                font-size: 3rem;
+            }
+            
+            .mobile-mockup {
+                flex-direction: column;
+            }
+        }
+
+        .data-viz {
+            grid-column: 1 / -1;
+        }
+
+        .chart-container {
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <i class="fas fa-cloud-sun"></i>
+            MeteoRwanda
+        </div>
+        <nav class="nav-buttons">
+            <button class="nav-btn active" onclick="showSection('dashboard')">Dashboard</button>
+            <button class="nav-btn" onclick="showSection('alerts')">Alerts</button>
+            <button class="nav-btn" onclick="showSection('forecast')">Forecast</button>
+            <button class="nav-btn" onclick="showSection('sectors')">Sectors</button>
+            <button class="nav-btn" onclick="showSection('mobile')">Mobile App</button>
+        </nav>
+    </header>
+
+    <div class="container">
+        <!-- Current Weather Section -->
+        <div class="weather-card current-weather" id="dashboard">
+            <div class="location">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Kigali, Rwanda</span>
+            </div>
+            <div class="weather-icon">
+                <i class="fas fa-sun"></i>
+            </div>
+            <div class="temperature">24°C</div>
+            <div class="weather-description">Partly Cloudy</div>
+            <div class="weather-details">
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-tint"></i></div>
+                    <div class="detail-value">65%</div>
+                    <div class="detail-label">Humidity</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-wind"></i></div>
+                    <div class="detail-value">12 km/h</div>
+                    <div class="detail-label">Wind Speed</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-eye"></i></div>
+                    <div class="detail-value">8 km</div>
+                    <div class="detail-label">Visibility</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-thermometer-half"></i></div>
+                    <div class="detail-value">1013 hPa</div>
+                    <div class="detail-label">Pressure</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Section -->
+        <div class="weather-card alerts-section" id="alerts" style="display: none;">
+            <h2><i class="fas fa-exclamation-triangle"></i> Weather Alerts</h2>
+            <div class="alert">
+                <i class="fas fa-bolt"></i>
+                <div>
+                    <strong>Severe Thunderstorm Warning</strong><br>
+                    Expected in Northern Province - Take shelter immediately
+                </div>
+            </div>
+            <div class="alert warning">
+                <i class="fas fa-cloud-rain"></i>
+                <div>
+                    <strong>Heavy Rain Advisory</strong><br>
+                    Kigali and surrounding areas - 6:00 PM to 10:00 PM
+                </div>
+            </div>
+            <div class="alert info">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    <strong>Agricultural Advisory</strong><br>
+                    Favorable conditions for planting in Southern Province
+                </div>
+            </div>
+        </div>
+
+        <!-- Forecast Section -->
+        <div class="weather-card forecast-section" id="forecast" style="display: none;">
+            <h2><i class="fas fa-calendar-alt"></i> 7-Day Forecast</h2>
+            <div class="forecast-container">
+                <div class="forecast-item">
+                    <div class="forecast-day">Today</div>
+                    <div><i class="fas fa-sun" style="color: #ffa726;"></i></div>
+                    <div class="forecast-temp">24°C / 18°C</div>
+                    <div>Sunny</div>
+                </div>
+                <div class="forecast-item">
+                    <div class="forecast-day">Tomorrow</div>
+                    <div><i class="fas fa-cloud-rain" style="color: #42a5f5;"></i></div>
+                    <div class="forecast-temp">22°C / 16°C</div>
+                    <div>Rainy</div>
+                </div>
+                <div class="forecast-item">
+                    <div class="forecast-day">Wednesday</div>
+                    <div><i class="fas fa-cloud-sun" style="color: #ffa726;"></i></div>
+                    <div class="forecast-temp">25°C / 17°C</div>
+                    <div>Partly Cloudy</div>
+                </div>
+                <div class="forecast-item">
+                    <div class="forecast-day">Thursday</div>
+                    <div><i class="fas fa-cloud" style="color: #90a4ae;"></i></div>
+                    <div class="forecast-temp">21°C / 15°C</div>
+                    <div>Cloudy</div>
+                </div>
+                <div class="forecast-item">
+                    <div class="forecast-day">Friday</div>
+                    <div><i class="fas fa-sun" style="color: #ffa726;"></i></div>
+                    <div class="forecast-temp">26°C / 19°C</div>
+                    <div>Sunny</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sector-Specific Information -->
+        <div class="weather-card sector-specific" id="sectors" style="display: none;">
+            <div class="sector-title">
+                <i class="fas fa-seedling"></i>
+                Agriculture Advisory
+            </div>
+            <div class="sector-advice">
+                <strong>Planting Recommendation:</strong><br>
+                Excellent conditions for maize planting in Central Province. Soil moisture at optimal levels.
+            </div>
+            <div class="sector-advice">
+                <strong>Irrigation Alert:</strong><br>
+                Reduce watering in Eastern Province due to expected rainfall this week.
+            </div>
+        </div>
+
+        <div class="weather-card sector-specific" id="health-sector" style="display: none;">
+            <div class="sector-title">
+                <i class="fas fa-heart"></i>
+                Health Advisory
+            </div>
+            <div class="sector-advice">
+                <strong>Heat Index Warning:</strong><br>
+                High temperatures expected. Stay hydrated and avoid prolonged sun exposure.
+            </div>
+        </div>
+
+        <!-- Mobile App Section -->
+        <div class="weather-card mobile-section" id="mobile" style="display: none;">
+            <h2><i class="fas fa-mobile-alt"></i> MeteoRwanda Mobile App</h2>
+            <p>Get real-time weather updates on your phone</p>
+            
+            <div class="mobile-mockup">
+                <div class="phone-frame">
+                    <div class="phone-screen">
+                        <div class="app-header">
+                            <i class="fas fa-cloud-sun"></i> MeteoRwanda
+                        </div>
+                        <div class="app-content">
+                            <div style="text-align: center; margin: 10px 0;">
+                                <div style="font-size: 1.2rem; font-weight: bold;">24°C</div>
+                                <div style="font-size: 0.6rem;">Kigali</div>
+                            </div>
+                            <div style="background: #f5f5f5; padding: 5px; border-radius: 5px; margin: 5px 0;">
+                                <div style="font-size: 0.6rem; font-weight: bold;">⚠️ Alert</div>
+                                <div style="font-size: 0.5rem;">Rain expected 6PM</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3>Key Features:</h3>
+                    <ul style="text-align: left; margin: 1rem 0;">
+                        <li>Real-time weather updates</li>
+                        <li>Push notifications for alerts</li>
+                        <li>Offline access to forecasts</li>
+                        <li>Sector-specific advisories</li>
+                        <li>Multi-language support</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="download-buttons">
+                <button class="download-btn">
+                    <i class="fab fa-android"></i>
+                    Download for Android
+                </button>
+                <button class="download-btn">
+                    <i class="fab fa-apple"></i>
+                    Download for iOS
+                </button>
+            </div>
+        </div>
+
+        <!-- Data Visualization Section -->
+        <div class="weather-card data-viz" id="data-viz" style="display: none;">
+            <h2><i class="fas fa-chart-line"></i> Weather Analytics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">45,670</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">1,234</div>
+                    <div class="stat-label">Alerts Sent Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">98.5%</div>
+                    <div class="stat-label">Forecast Accuracy</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">12</div>
+                    <div class="stat-label">Weather Stations</div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <i class="fas fa-chart-area" style="font-size: 3rem; margin-right: 1rem;"></i>
+                <div>
+                    <h3>Temperature Trends</h3>
+                    <p>Interactive charts would be displayed here<br>showing historical and forecast data</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = ['dashboard', 'alerts', 'forecast', 'sectors', 'mobile', 'data-viz'];
+            sections.forEach(section => {
+                const element = document.getElementById(section);
+                if (element) {
+                    element.style.display = 'none';
+                }
+            });
+            
+            // Show additional sector cards when sectors is selected
+            const healthSector = document.getElementById('health-sector');
+            if (healthSector) {
+                healthSector.style.display = sectionName === 'sectors' ? 'block' : 'none';
+            }
+            
+            // Show selected section
+            const selectedElement = document.getElementById(sectionName);
+            if (selectedElement) {
+                selectedElement.style.display = 'block';
+            }
+            
+            // Update active nav button
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // Simulate real-time updates
+        function updateWeatherData() {
+            const temps = [22, 23, 24, 25, 26];
+            const currentTemp = temps[Math.floor(Math.random() * temps.length)];
+            document.querySelector('.temperature').textContent = currentTemp + '°C';
+            
+            // Update humidity
+            const humidity = Math.floor(Math.random() * 40) + 40;
+            document.querySelector('.detail-value').textContent = humidity + '%';
+        }
+
+        // Update weather every 30 seconds (simulated)
+        setInterval(updateWeatherData, 30000);
+
+        // Simulate alert notifications
+        function showNotification() {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('MeteoRwanda Alert', {
+                    body: 'Heavy rain expected in your area within the next hour.',
+                    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⛈️</text></svg>'
+                });
+            }
+        }
+
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        // Show notification every 2 minutes (demo purposes)
+        setTimeout(showNotification, 120000);
+
+        // Initialize dashboard view
+        document.addEventListener('DOMContentLoaded', function() {
+            showSection('dashboard');
+        });
+    </script>
+</body>
+</html>
