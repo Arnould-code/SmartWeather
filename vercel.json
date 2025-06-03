@@ -1,3 +1,8 @@
 {
-    "rewrites": [{ "source": "/(.*)", "destination": "/mvp.html" }]
+    "rewrites": [{ "source": "/(.*)", "destination": "/mvp.html" }],
+    "builds": [],
+    "routes": [],
+    "cleanUrls": true,
+    "trailingSlash": false
+  
 }
